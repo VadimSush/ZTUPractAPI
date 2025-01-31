@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PractAPI.Controllers
@@ -19,8 +20,6 @@ namespace PractAPI.Controllers
             new Book(9, "Book 9", "Author 9"),
             new Book(10, "Book 10", "Author 10"),
             ];
-
-        private static readonly List<User> users = [new User("user", "user", "User"), new User("admin", "admin", "Admin")];
 
         private static int id = 11;
 
@@ -44,6 +43,7 @@ namespace PractAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public ActionResult<Book> AddBook([FromBody] Book book)
         {
             books.Add(book);
@@ -55,6 +55,7 @@ namespace PractAPI.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize]
         public ActionResult<Book> UpdateBook(int id, [FromBody] Book book)
         {
             Book? oldBook = GetBookById(id);
@@ -71,6 +72,7 @@ namespace PractAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteBook(int id)
         {
             Book? book = GetBookById(id);
