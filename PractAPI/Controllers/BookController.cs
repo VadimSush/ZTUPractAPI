@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PractAPI.Controllers
 {
@@ -6,7 +7,7 @@ namespace PractAPI.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly List<Book> books = [
+        private static readonly List<Book> books = [
             new Book(1, "Book 1", "Author 1"),
             new Book(2, "Book 2", "Author 2"),
             new Book(3, "Book 3", "Author 3"),
@@ -19,38 +20,72 @@ namespace PractAPI.Controllers
             new Book(10, "Book 10", "Author 10"),
             ];
 
+        private static int id = 11;
+
         [HttpGet]
-        public ActionResult<IEnumerable<Book>> GetAll()
+        public ActionResult<IEnumerable<Book>> GetAllBooks()
         {
             return Ok(books);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Book> Get(int id)
+        public ActionResult<Book> GetBook(int id)
         {
-            Book? book = books.FirstOrDefault(x => x.Id == id);
+            Book? book = GetBookById(id);
 
             if (book != null)
             {
                 return Ok(book);
             }
 
-            return NotFound();
+            return NotFound("Book with this id doesn't exist");
         }
 
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult<Book> AddBook([FromBody] Book book)
         {
+            books.Add(book);
+
+            book.Id = id;
+            id++;
+
+            return StatusCode(201, book);
         }
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPatch("{id}")]
+        public ActionResult<Book> UpdateBook(int id, [FromBody] Book book)
         {
+            Book? oldBook = GetBookById(id);
+
+            if (oldBook != null)
+            {
+                oldBook.Name = book.Name;
+                oldBook.Author = book.Author;
+
+                return Ok(oldBook);
+            }
+
+            return NotFound("Book with this id doesn't exist");
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult DeleteBook(int id)
         {
+            Book? book = GetBookById(id);
+
+            if (book != null)
+            {
+                books.Remove(book);
+
+                return NoContent();
+            }
+
+            return NotFound("Book with this id doesn't exist");
         }
+
+        public Book? GetBookById(int id)
+        {
+            return books.FirstOrDefault(book => book.Id == id);
+        } 
     }
 }
