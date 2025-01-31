@@ -20,6 +20,8 @@ namespace PractAPI.Controllers
             new Book(10, "Book 10", "Author 10"),
             ];
 
+        private static readonly List<User> users = [new User("user", "user", "User"), new User("admin", "admin", "Admin")];
+
         private static int id = 11;
 
         [HttpGet]
